@@ -7,6 +7,12 @@ Let me know if I am missing any T1D (only type 1, not type 2)
 
 Anyone who wants to help is more than free to; just email me how you would like to help
 
+## Link and example
+
+https://jtb21091.github.io/DiabeticAthletes/
+
+![alt text](image.png)
+
 ## Please check these out for awareness and more information
 
 https://www.breakthrought1d.org/
@@ -27,9 +33,3 @@ This project provides an easy-to-use **Player Profile Link Finder** that allows 
 1. **Download the project folder** (or clone it).
 2. **Go to the `html` folder** inside the project.
 3. **Double-click `index.html`** – It will open in your browser! 🎉
-
-## Link and example
-
-https://jtb21091.github.io/DiabeticAthletes/
-
-![alt text](image.png)
