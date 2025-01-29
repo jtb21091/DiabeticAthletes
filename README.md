@@ -21,4 +21,4 @@ This project provides an easy-to-use **Player Profile Link Finder** that allows 
 3. **Double-click `index.html`** – It will open in your browser! 🎉
 
 
-![alt text](Datasets/image.png)
+![alt text](image.png)
