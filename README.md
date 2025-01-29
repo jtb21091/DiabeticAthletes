@@ -23,6 +23,8 @@ https://beyondtype1.org/
 
 https://github.com/jtb21091/HealthDataPublicDiabetes
 
+https://en.wikipedia.org/wiki/Category:People_with_type_1_diabetes
+
 # 🏆 Diabetic Athletes - Player Links
 
 This project provides an easy-to-use **Player Profile Link Finder** that allows users to search for diabetic athletes and access their player profile links. The search bar helps you find players quickly, and each player has multiple links categorized by website. This now includes musicians, actors and actresses.
