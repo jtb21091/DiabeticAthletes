@@ -11,25 +11,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            flex-direction: column;
             margin: 0;
+            padding-bottom: 50px;
         }
         .container {
-            display: flex;
-            width: 90%;
-            justify-content: space-between;
-            align-items: center;
-            text-align: center;
-        }
-        .ads {
-            width: 20%;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .content {
-            width: 60%;
+            width: 80%;
+            max-width: 800px;
             text-align: center;
         }
         input {
@@ -45,60 +33,68 @@
         li {
             margin: 10px 0;
             font-size: 18px;
+            cursor: pointer;
+            color: blue;
+            font-weight: bold;
+            text-decoration: underline;
         }
-        a {
+        li:hover {
+            color: darkred;
+        }
+        .links-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            width: 100%;
+        }
+        .links-container a {
             text-decoration: none;
             color: blue;
             font-weight: bold;
-            margin-right: 10px;
-            position: relative;
+            margin: 5px;
+            display: block;
         }
-        a:hover {
+        .links-container a:hover {
             color: darkred;
         }
-        a::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: black;
-            color: white;
-            padding: 5px 10px;
-            font-size: 12px;
-            border-radius: 5px;
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
+        .iframe-container {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            overflow: auto;
         }
-        a:hover::after {
-            opacity: 1;
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            overflow: auto;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Left Ad: Breakthrough T1D -->
-        <div class="ads">
-            <p><a href="https://www.breakthrought1d.org/" target="_blank">Support Type 1 Diabetes Research</a></p>
+        <h1>MLB Player Profile Links</h1>
+        
+        <!-- Search Input (Now Fully Functional) -->
+        <input type="text" id="searchBar" placeholder="Search for a player..." list="playerNames" oninput="filterPlayers()" onkeypress="handleEnterKey(event)">
+        <datalist id="playerNames"></datalist>
+        
+        <ul id="playerList"></ul>
+
+        <!-- Player Links Section -->
+        <div id="linksContainer" class="links-container">
+            <h2 id="playerTitle"></h2>
+            <div id="linksList"></div>
         </div>
 
-        <!-- Main Content -->
-        <div class="content">
-            <h1>MLB Player Profile Links</h1>
-            
-            <!-- Search Input with Auto-Suggestions -->
-            <input list="playerNames" type="text" id="searchBar" placeholder="Search for a player..." oninput="filterPlayers()">
-            <datalist id="playerNames"></datalist>
-            
-            <ul id="playerList"></ul>
-        </div>
-
-        <!-- Right Ad: CDC Diabetes Atlas -->
-        <div class="ads">
-            <p><a href="https://gis.cdc.gov/grasp/diabetes/diabetesatlas.html" target="_blank">Explore the CDC Diabetes Atlas</a></p>
+        <!-- Link Preview Section -->
+        <div id="iframeContainer" class="iframe-container">
+            <iframe id="previewFrame"></iframe>
         </div>
     </div>
 
@@ -128,7 +124,6 @@
             // Sort Players Alphabetically
             players.sort((a, b) => a.name.localeCompare(b.name));
 
-            updateAutoComplete();
             displayPlayers(players);
         }
 
@@ -137,40 +132,99 @@
             list.innerHTML = "";
             playerArray.forEach(player => {
                 const li = document.createElement("li");
-                const nameSpan = document.createElement("span");
-                nameSpan.textContent = player.name + ": ";
-                li.appendChild(nameSpan);
-
-                player.links.forEach(link => {
-                    const a = document.createElement("a");
-                    a.href = link;
-                    a.textContent = getDomainName(link); // Display site name instead of "Link 1"
-                    a.target = "_blank";
-                    a.rel = "noopener noreferrer";
-                    a.setAttribute("data-tooltip", link); // Tooltip on hover
-                    li.appendChild(a);
-                    li.appendChild(document.createTextNode(" ")); // Space between links
-                });
-
+                li.textContent = player.name;
+                li.onclick = () => showPlayerLinks(player);
                 list.appendChild(li);
             });
+
+            updateAutoComplete();
         }
 
         function filterPlayers() {
             const searchTerm = document.getElementById("searchBar").value.toLowerCase();
             const filteredPlayers = players.filter(player => player.name.toLowerCase().includes(searchTerm));
+
             displayPlayers(filteredPlayers);
         }
 
         function updateAutoComplete() {
+            const searchTerm = document.getElementById("searchBar").value.toLowerCase();
             const dataList = document.getElementById("playerNames");
             dataList.innerHTML = ""; // Clear previous list
 
-            players.forEach(player => {
-                const option = document.createElement("option");
-                option.value = player.name;
-                dataList.appendChild(option);
-            });
+            players
+                .filter(player => player.name.toLowerCase().includes(searchTerm))
+                .forEach(player => {
+                    const option = document.createElement("option");
+                    option.value = player.name;
+                    dataList.appendChild(option);
+                });
+        }
+
+        function handleEnterKey(event) {
+            if (event.key === "Enter") {
+                const searchInput = document.getElementById("searchBar").value.toLowerCase();
+                const matchedPlayer = players.find(player => player.name.toLowerCase() === searchInput);
+                if (matchedPlayer) {
+                    showPlayerLinks(matchedPlayer);
+                }
+            }
+        }
+
+        function showPlayerLinks(player) {
+            const linksContainer = document.getElementById("linksContainer");
+            const linksList = document.getElementById("linksList");
+            const iframeContainer = document.getElementById("iframeContainer");
+            const playerTitle = document.getElementById("playerTitle");
+            const iframe = document.getElementById("previewFrame");
+
+            // Update Player Title
+            playerTitle.textContent = `Links for ${player.name}`;
+
+            // Clear old links
+            linksList.innerHTML = "";
+
+            if (player.links.length === 0) {
+                linksList.innerHTML = "<p>No links available for this player.</p>";
+                iframeContainer.style.display = "none"; // Hide iframe if no links
+            } else {
+                player.links.forEach((link, index) => {
+                    const a = document.createElement("a");
+                    a.href = link;
+                    a.textContent = getDomainName(link);
+                    a.target = "_blank"; // Opens in new tab
+                    a.rel = "noopener noreferrer";
+
+                    // Also load in iframe on click (without interrupting new tab behavior)
+                    a.onclick = (event) => {
+                        event.preventDefault();
+                        showPreview(link);
+                        window.open(link, "_blank"); // Open in new tab
+                    };
+
+                    linksList.appendChild(a);
+
+                    // Load the first available link in the iframe automatically
+                    if (index === 0) {
+                        showPreview(link);
+                    }
+                });
+
+                iframeContainer.style.display = "block"; // Show iframe only if links exist
+            }
+
+            // Show Containers
+            linksContainer.style.display = "flex";
+
+            // Auto-scroll to links section
+            setTimeout(() => {
+                linksContainer.scrollIntoView({ behavior: "smooth" });
+            }, 200);
+        }
+
+        function showPreview(url) {
+            const iframe = document.getElementById("previewFrame");
+            iframe.src = url;
         }
 
         function getDomainName(url) {
