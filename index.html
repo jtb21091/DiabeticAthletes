@@ -80,19 +80,16 @@
     <div class="container">
         <h1>MLB Player Profile Links</h1>
         
-        <!-- Search Input (Now Fully Functional) -->
         <input type="text" id="searchBar" placeholder="Search for a player..." list="playerNames" oninput="filterPlayers()" onkeypress="handleEnterKey(event)">
         <datalist id="playerNames"></datalist>
         
         <ul id="playerList"></ul>
 
-        <!-- Player Links Section -->
         <div id="linksContainer" class="links-container">
             <h2 id="playerTitle"></h2>
             <div id="linksList"></div>
         </div>
 
-        <!-- Link Preview Section -->
         <div id="iframeContainer" class="iframe-container">
             <iframe id="previewFrame"></iframe>
         </div>
@@ -121,7 +118,6 @@
                 return { name, links };
             });
 
-            // Sort Players Alphabetically
             players.sort((a, b) => a.name.localeCompare(b.name));
 
             displayPlayers(players);
@@ -143,14 +139,13 @@
         function filterPlayers() {
             const searchTerm = document.getElementById("searchBar").value.toLowerCase();
             const filteredPlayers = players.filter(player => player.name.toLowerCase().includes(searchTerm));
-
             displayPlayers(filteredPlayers);
         }
 
         function updateAutoComplete() {
             const searchTerm = document.getElementById("searchBar").value.toLowerCase();
             const dataList = document.getElementById("playerNames");
-            dataList.innerHTML = ""; // Clear previous list
+            dataList.innerHTML = "";
 
             players
                 .filter(player => player.name.toLowerCase().includes(searchTerm))
@@ -178,45 +173,39 @@
             const playerTitle = document.getElementById("playerTitle");
             const iframe = document.getElementById("previewFrame");
 
-            // Update Player Title
             playerTitle.textContent = `Links for ${player.name}`;
 
-            // Clear old links
             linksList.innerHTML = "";
 
             if (player.links.length === 0) {
                 linksList.innerHTML = "<p>No links available for this player.</p>";
-                iframeContainer.style.display = "none"; // Hide iframe if no links
+                iframeContainer.style.display = "none";
             } else {
                 player.links.forEach((link, index) => {
                     const a = document.createElement("a");
                     a.href = link;
                     a.textContent = getDomainName(link);
-                    a.target = "_blank"; // Opens in new tab
+                    a.target = "_blank";
                     a.rel = "noopener noreferrer";
 
-                    // Also load in iframe on click (without interrupting new tab behavior)
                     a.onclick = (event) => {
                         event.preventDefault();
                         showPreview(link);
-                        window.open(link, "_blank"); // Open in new tab
+                        window.open(link, "_blank");
                     };
 
                     linksList.appendChild(a);
 
-                    // Load the first available link in the iframe automatically
                     if (index === 0) {
                         showPreview(link);
                     }
                 });
 
-                iframeContainer.style.display = "block"; // Show iframe only if links exist
+                iframeContainer.style.display = "block";
             }
 
-            // Show Containers
             linksContainer.style.display = "flex";
 
-            // Auto-scroll to links section
             setTimeout(() => {
                 linksContainer.scrollIntoView({ behavior: "smooth" });
             }, 200);
@@ -229,14 +218,13 @@
 
         function getDomainName(url) {
             try {
-                const domain = new URL(url).hostname.replace("www.", ""); // Extract domain name
+                const domain = new URL(url).hostname.replace("www.", "");
                 return domain;
             } catch {
-                return "Link"; // Default name if error
+                return "Link";
             }
         }
 
-        // Fetch CSV on page load
         fetchCSV();
     </script>
 
