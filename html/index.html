@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLB Player Links</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            width: 90%;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+        }
+        .ads {
+            width: 20%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .content {
+            width: 60%;
+            text-align: center;
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        a {
+            text-decoration: none;
+            color: blue;
+            font-weight: bold;
+            margin-right: 10px;
+            position: relative;
+        }
+        a:hover {
+            color: darkred;
+        }
+        a::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: black;
+            color: white;
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 5px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        a:hover::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Left Ad: Breakthrough T1D -->
+        <div class="ads">
+            <p><a href="https://www.breakthrought1d.org/" target="_blank">Support Type 1 Diabetes Research</a></p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <h1>MLB Player Profile Links</h1>
+            
+            <!-- Search Input with Auto-Suggestions -->
+            <input list="playerNames" type="text" id="searchBar" placeholder="Search for a player..." oninput="filterPlayers()">
+            <datalist id="playerNames"></datalist>
+            
+            <ul id="playerList"></ul>
+        </div>
+
+        <!-- Right Ad: CDC Diabetes Atlas -->
+        <div class="ads">
+            <p><a href="https://gis.cdc.gov/grasp/diabetes/diabetesatlas.html" target="_blank">Explore the CDC Diabetes Atlas</a></p>
+        </div>
+    </div>
+
+    <script>
+        const csvFilePath = "../Datasets/T1Ds - Sheet1.csv"; // Ensure correct path
+
+        let players = [];
+
+        async function fetchCSV() {
+            try {
+                const response = await fetch(csvFilePath);
+                const text = await response.text();
+                parseCSV(text);
+            } catch (error) {
+                console.error("Error loading CSV file:", error);
+            }
+        }
+
+        function parseCSV(csvText) {
+            const rows = csvText.split("\n").map(row => row.split(","));
+            players = rows.slice(1).map(row => {
+                const name = row[0].trim();
+                const links = row.slice(1).map(link => link.trim()).filter(link => link);
+                return { name, links };
+            });
+
+            // Sort Players Alphabetically
+            players.sort((a, b) => a.name.localeCompare(b.name));
+
+            updateAutoComplete();
+            displayPlayers(players);
+        }
+
+        function displayPlayers(playerArray) {
+            const list = document.getElementById("playerList");
+            list.innerHTML = "";
+            playerArray.forEach(player => {
+                const li = document.createElement("li");
+                const nameSpan = document.createElement("span");
+                nameSpan.textContent = player.name + ": ";
+                li.appendChild(nameSpan);
+
+                player.links.forEach(link => {
+                    const a = document.createElement("a");
+                    a.href = link;
+                    a.textContent = getDomainName(link); // Display site name instead of "Link 1"
+                    a.target = "_blank";
+                    a.rel = "noopener noreferrer";
+                    a.setAttribute("data-tooltip", link); // Tooltip on hover
+                    li.appendChild(a);
+                    li.appendChild(document.createTextNode(" ")); // Space between links
+                });
+
+                list.appendChild(li);
+            });
+        }
+
+        function filterPlayers() {
+            const searchTerm = document.getElementById("searchBar").value.toLowerCase();
+            const filteredPlayers = players.filter(player => player.name.toLowerCase().includes(searchTerm));
+            displayPlayers(filteredPlayers);
+        }
+
+        function updateAutoComplete() {
+            const dataList = document.getElementById("playerNames");
+            dataList.innerHTML = ""; // Clear previous list
+
+            players.forEach(player => {
+                const option = document.createElement("option");
+                option.value = player.name;
+                dataList.appendChild(option);
+            });
+        }
+
+        function getDomainName(url) {
+            try {
+                const domain = new URL(url).hostname.replace("www.", ""); // Extract domain name
+                return domain;
+            } catch {
+                return "Link"; // Default name if error
+            }
+        }
+
+        // Fetch CSV on page load
+        fetchCSV();
+    </script>
+
+</body>
+</html>
