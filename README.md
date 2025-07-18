@@ -1,5 +1,5 @@
 # DiabeticAthletes
-A simple website, data, links and information for T1D athletes and actors and actresses so that people can find them in one source
+A simple website, data, links and information for T1D athletes, musicians, actors and actresses so that people can find them in one source. 
 
 This is a work in progress.
 
