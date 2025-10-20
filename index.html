@@ -5,106 +5,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Diabetic Athletes — T1D Awareness</title>
   <style>
-    :root {
-      --bg:#ffffff;
-      --text:#111827;
-      --accent:#0ea5e9;
-      --card:#f3f4f6;
-      --border:#e5e7eb;
+    :root{
+      --bg:#ffffff; --text:#111827; --muted:#6b7280; --accent:#0ea5e9;
+      --card:#f3f4f6; --border:#e5e7eb;
     }
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      display:flex;
-      justify-content:center;
-      min-height:100vh;
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      display:flex; justify-content:center; min-height:100vh;
     }
-    .container {
-      width: min(1100px, 94vw);
-      padding: 32px 0 72px;
-      text-align:center;
-    }
-    h1 { margin: 0 0 16px; font-weight: 800; }
-    .sub { margin: 0 0 24px; color:#6b7280; }
+    .container{ width:min(1100px,94vw); padding:32px 0 80px; }
+    h1{ margin:0 0 8px; text-align:center; font-weight:800; }
+    .sub{ margin:0 0 22px; text-align:center; color:var(--muted); }
 
     /* Search */
-    .search-wrap { display:flex; justify-content:center; }
-    input[type="text"]{
-      width:min(760px, 92vw);
-      padding:14px 16px;
-      font-size:16px;
-      border:1px solid var(--border);
-      border-radius:12px;
-      outline:none;
+    .search-wrap{ position:relative; display:flex; justify-content:center; }
+    #searchBar{
+      width:min(760px,92vw); padding:14px 16px; font-size:16px;
+      border:1px solid var(--border); border-radius:12px; outline:none;
     }
+    /* Custom suggestion dropdown (replaces datalist) */
+    .suggestions{
+      position:absolute; top:100%; left:50%; transform:translateX(-50%);
+      width:min(760px,92vw); background:#fff; border:1px solid var(--border);
+      border-radius:12px; margin-top:6px; box-shadow:0 8px 24px rgba(0,0,0,.08);
+      max-height:320px; overflow:auto; display:none; z-index:20;
+    }
+    .suggestion{
+      padding:10px 14px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .suggestion:hover, .suggestion.active{ background:#f8fafc; }
 
-    /* Hide the big list of names */
-    #playerList { display:none; }
+    /* Carousel */
+    .carousel-title{ margin:28px 0 10px; font-size:18px; font-weight:700; }
+    .carousel{ display:flex; gap:14px; overflow-x:auto; scroll-snap-type:x mandatory; padding:8px 2px; }
+    .card{
+      min-width:180px; max-width:180px; background:var(--card); border:1px solid var(--border);
+      border-radius:16px; overflow:hidden; scroll-snap-align:start; cursor:pointer; display:flex; flex-direction:column;
+    }
+    .card img{ width:100%; height:200px; object-fit:cover; background:#d1d5db; }
+    .card .meta{ display:flex; justify-content:space-between; align-items:center; padding:10px 12px; }
+    .card .name{ font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .card .cta{ font-size:12px; font-weight:700; color:var(--accent); }
 
     /* Links + iframe */
-    .links-container{
-      display:none;
-      flex-direction:column;
-      align-items:center;
-      margin-top:24px;
-      width:100%;
-    }
-    .links-container a{
-      text-decoration:none;
-      color:#2563eb;
-      font-weight:600;
-      margin:6px 0;
-      display:block;
-    }
+    .links-container{ display:none; flex-direction:column; align-items:center; margin-top:24px; width:100%; }
+    .links-container a{ text-decoration:none; color:#2563eb; font-weight:600; margin:6px 0; display:block; }
     .links-container a:hover{ color:#b91c1c; }
     .iframe-container{
-      display:none;
-      width:100%;
-      height:640px;
-      border:1px solid var(--border);
-      border-radius:12px;
-      margin-top:16px;
-      overflow:hidden;
+      display:none; width:100%; height:640px; border:1px solid var(--border);
+      border-radius:12px; margin-top:16px; overflow:hidden;
     }
     iframe{ width:100%; height:100%; border:0; }
 
-    /* Carousel */
-    .carousel-title { text-align:left; margin:28px 0 10px; font-size:18px; font-weight:700; }
-    .carousel {
-      display:flex;
-      gap:14px;
-      overflow-x:auto;
-      scroll-snap-type:x mandatory;
-      padding: 8px 4px 8px 2px;
-    }
-    .card {
-      min-width: 180px; max-width: 180px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius:16px;
-      overflow:hidden;
-      scroll-snap-align:start;
-      cursor:pointer;
-      display:flex;
-      flex-direction:column;
-      text-align:left;
-    }
-    .card img {
-      width:100%; height:200px; object-fit:cover; background:#d1d5db;
-    }
-    .card .meta {
-      padding:10px 12px;
-      display:flex; align-items:center; justify-content:space-between;
-    }
-    .card .name { font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .card .cta {
-      font-size:12px; font-weight:700; color:var(--accent);
-    }
+    /* Hide any old list */
+    #playerList{ display:none; }
 
-    /* small helper */
-    .muted { color:#6b7280; font-size:12px; }
+    .muted{ color:var(--muted); font-size:12px; text-align:center; }
   </style>
 </head>
 <body>
@@ -113,21 +71,20 @@
     <p class="sub">Search by name to open links and a live preview. Click a card below to jump right in.</p>
 
     <div class="search-wrap">
-      <input type="text" id="searchBar" placeholder="Search for a player…" list="playerNames" oninput="updateAutoComplete()" onkeypress="handleEnterKey(event)" />
-      <datalist id="playerNames"></datalist>
+      <input id="searchBar" type="text" placeholder="Search for a player…" autocomplete="off"
+             oninput="onType()" onkeydown="onKeyNav(event)"/>
+      <div id="suggestions" class="suggestions" role="listbox" aria-label="Suggestions"></div>
     </div>
 
-    <!-- Random Carousel -->
     <div id="carouselBlock" style="display:none;">
       <div class="carousel-title">Explore athletes</div>
       <div id="carousel" class="carousel" aria-label="Random athlete carousel"></div>
-      <div class="muted" id="carouselHint">Tip: click a card to load links & preview.</div>
+      <div class="muted">Tip: click a card to load links & preview.</div>
     </div>
 
-    <!-- Hidden big list (kept for compatibility, not shown) -->
+    <!-- kept for compatibility, not displayed -->
     <ul id="playerList"></ul>
 
-    <!-- Links + Preview -->
     <div id="linksContainer" class="links-container">
       <h2 id="playerTitle"></h2>
       <div id="linksList"></div>
@@ -139,70 +96,94 @@
 
   <script>
     const csvFilePath = "T1Ds - Sheet1.csv";
-    const PLACEHOLDER_IMG = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1200&auto=format&fit=crop"; // neutral fallback
+    const PLACEHOLDER_IMG = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1200&auto=format&fit=crop";
 
     let players = [];
+    let filtered = [];
+    let activeIndex = -1;
 
-    async function fetchCSV() {
-      try {
+    /* ---------- Load CSV ---------- */
+    async function fetchCSV(){
+      try{
         const resp = await fetch(csvFilePath);
         const text = await resp.text();
         parseCSV(text);
-      } catch (e) {
-        console.error("Error loading CSV:", e);
-      }
+      }catch(e){ console.error("CSV load error:", e); }
     }
 
     function parseCSV(csvText){
-      const rows = csvText
-        .split(/\r?\n/)
-        .filter(r => r.trim().length)
-        .map(row => row.split(","));
-
+      const rows = csvText.split(/\r?\n/).filter(r=>r.trim().length).map(r=>r.split(","));
       // Expect: Name, ImageURL, Link1, Link2, ...
-      players = rows.slice(1).map(cols => {
+      players = rows.slice(1).map(cols=>{
         const name = (cols[0]||"").trim();
         const img  = (cols[1]||"").trim();
-        const links = cols.slice(2).map(x => (x||"").trim()).filter(Boolean);
+        const links = cols.slice(2).map(x=>(x||"").trim()).filter(Boolean);
         return { name, img, links };
-      }).filter(p => p.name);
+      }).filter(p=>p.name);
 
       players.sort((a,b)=>a.name.localeCompare(b.name));
-
-      // We NO LONGER render the full list of names
-      updateAutoComplete();
       buildCarousel(players);
     }
 
-    function updateAutoComplete(){
-      const val = document.getElementById("searchBar").value.toLowerCase();
-      const dl = document.getElementById("playerNames");
-      dl.innerHTML = "";
-      players
-        .filter(p => p.name.toLowerCase().includes(val))
-        .slice(0, 50) // keep it snappy
-        .forEach(p => {
-          const opt = document.createElement("option");
-          opt.value = p.name;
-          dl.appendChild(opt);
-        });
+    /* ---------- Custom autocomplete ---------- */
+    function onType(){
+      const q = document.getElementById("searchBar").value.trim().toLowerCase();
+      const box = document.getElementById("suggestions");
+      activeIndex = -1;
+
+      if(!q){ box.style.display="none"; return; }
+
+      filtered = players.filter(p=>p.name.toLowerCase().includes(q)).slice(0,50);
+      box.innerHTML = "";
+      filtered.forEach((p,i)=>{
+        const div = document.createElement("div");
+        div.className = "suggestion";
+        div.textContent = p.name;
+        div.setAttribute("role","option");
+        div.onclick = ()=>selectSuggestion(i);
+        box.appendChild(div);
+      });
+      box.style.display = filtered.length ? "block" : "none";
     }
 
-    function handleEnterKey(ev){
-      if (ev.key === "Enter"){
-        const val = document.getElementById("searchBar").value.toLowerCase();
-        const match = players.find(p => p.name.toLowerCase() === val);
-        if (match){ showPlayer(match); }
+    function onKeyNav(e){
+      const box = document.getElementById("suggestions");
+      const items = Array.from(box.children);
+      if(!items.length) return;
+
+      if(e.key === "ArrowDown"){ e.preventDefault(); activeIndex = (activeIndex+1) % items.length; highlight(items); }
+      else if(e.key === "ArrowUp"){ e.preventDefault(); activeIndex = (activeIndex-1+items.length) % items.length; highlight(items); }
+      else if(e.key === "Enter"){
+        if(activeIndex >= 0){ e.preventDefault(); selectSuggestion(activeIndex); }
+        else {
+          // direct exact match
+          const val = document.getElementById("searchBar").value.trim().toLowerCase();
+          const m = players.find(p=>p.name.toLowerCase()===val);
+          if(m) showPlayer(m);
+        }
+      } else if(e.key === "Escape"){ box.style.display="none"; }
+    }
+
+    function highlight(items){
+      items.forEach((el,i)=>el.classList.toggle("active", i===activeIndex));
+      if(items[activeIndex]) items[activeIndex].scrollIntoView({block:"nearest"});
+    }
+
+    function selectSuggestion(i){
+      const p = filtered[i];
+      document.getElementById("searchBar").value = p.name;
+      document.getElementById("suggestions").style.display="none";
+      showPlayer(p);
+    }
+
+    // Close suggestions when clicking elsewhere
+    document.addEventListener("click", (e)=>{
+      if(!document.querySelector(".search-wrap").contains(e.target)){
+        document.getElementById("suggestions").style.display="none";
       }
-    }
-
-    // If user selects from the datalist and the text field "changes"
-    document.getElementById("searchBar").addEventListener("change", () => {
-      const val = document.getElementById("searchBar").value.toLowerCase();
-      const match = players.find(p => p.name.toLowerCase() === val);
-      if (match){ showPlayer(match); }
     });
 
+    /* ---------- Player view ---------- */
     function showPlayer(player){
       const linksContainer = document.getElementById("linksContainer");
       const linksList = document.getElementById("linksList");
@@ -212,87 +193,62 @@
       playerTitle.textContent = player.name;
       linksList.innerHTML = "";
 
-      if (!player.links.length){
+      if(!player.links.length){
         linksList.innerHTML = "<p>No links available for this player.</p>";
         iframeContainer.style.display = "none";
-      } else {
-        player.links.forEach((link, i) => {
+      }else{
+        player.links.forEach((link,i)=>{
           const a = document.createElement("a");
-          a.href = link;
-          a.textContent = getDomain(link);
-          a.target = "_blank"; a.rel = "noopener noreferrer";
-
-          a.onclick = (e) => {
-            e.preventDefault();
-            showPreview(link);
-            window.open(link, "_blank");
-          };
-
+          a.href = link; a.textContent = getDomain(link);
+          a.target="_blank"; a.rel="noopener noreferrer";
+          a.onclick = (e)=>{ e.preventDefault(); showPreview(link); window.open(link,"_blank"); };
           linksList.appendChild(a);
-          if (i === 0) showPreview(link);
+          if(i===0) showPreview(link);
         });
         iframeContainer.style.display = "block";
       }
 
       linksContainer.style.display = "flex";
-      setTimeout(()=>linksContainer.scrollIntoView({behavior:"smooth"}), 100);
+      setTimeout(()=>linksContainer.scrollIntoView({behavior:"smooth"}), 120);
     }
 
-    function showPreview(url){
-      const iframe = document.getElementById("previewFrame");
-      iframe.src = url;
-    }
+    function showPreview(url){ document.getElementById("previewFrame").src = url; }
+    function getDomain(url){ try{ return new URL(url).hostname.replace(/^www\./,""); }catch{ return "Link"; } }
 
-    function getDomain(url){
-      try { return new URL(url).hostname.replace(/^www\./, ""); }
-      catch { return "Link"; }
-    }
-
-    /* -------- Carousel -------- */
+    /* ---------- Carousel ---------- */
     function buildCarousel(all){
-      const withImages = all.filter(p => p.img);
-      const pool = withImages.length ? withImages : all.map(p => ({...p, img: PLACEHOLDER_IMG}));
+      const withImg = all.filter(p=>p.img);
+      const pool = withImg.length ? withImg : all.map(p=>({...p, img: PLACEHOLDER_IMG}));
 
-      // pick up to 12 random unique players
       const picks = [];
       const used = new Set();
       const max = Math.min(12, pool.length);
-      while (picks.length < max){
-        const i = Math.floor(Math.random() * pool.length);
-        if (!used.has(i)){ used.add(i); picks.push(pool[i]); }
+      while(picks.length < max){
+        const i = Math.floor(Math.random()*pool.length);
+        if(!used.has(i)){ used.add(i); picks.push(pool[i]); }
       }
 
       const block = document.getElementById("carouselBlock");
-      const wrap  = document.getElementById("carousel");
+      const wrap = document.getElementById("carousel");
       wrap.innerHTML = "";
-
-      picks.forEach(p => {
+      picks.forEach(p=>{
         const card = document.createElement("div");
         card.className = "card";
         card.innerHTML = `
           <img src="${p.img || PLACEHOLDER_IMG}" alt="${p.name || 'Athlete'}"/>
-          <div class="meta">
-            <div class="name" title="${p.name}">${p.name}</div>
-            <div class="cta">Open</div>
-          </div>
-        `;
-        card.onclick = () => {
-          document.getElementById("searchBar").value = p.name;
-          updateAutoComplete();
-          showPlayer(p);
-        };
+          <div class="meta"><div class="name" title="${p.name}">${p.name}</div><div class="cta">Open</div></div>`;
+        card.onclick = ()=>{ document.getElementById("searchBar").value = p.name; showPlayer(p); };
         wrap.appendChild(card);
       });
-
       block.style.display = picks.length ? "block" : "none";
 
-      // gentle auto-scroll hint
-      let x = 0;
+      // gentle auto-scroll
+      let x=0;
       setInterval(()=>{
-        if (!wrap.isConnected) return;
-        x = (x + 220);
-        if (x > wrap.scrollWidth - wrap.clientWidth) x = 0;
-        wrap.scrollTo({ left: x, behavior: "smooth" });
+        if(!wrap.isConnected) return;
+        x = (x+220);
+        if(x > wrap.scrollWidth - wrap.clientWidth) x = 0;
+        wrap.scrollTo({left:x, behavior:"smooth"});
       }, 4000);
     }
 
