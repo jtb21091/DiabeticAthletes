@@ -19,13 +19,12 @@
     h1{ margin:0 0 8px; text-align:center; font-weight:800; }
     .sub{ margin:0 0 22px; text-align:center; color:var(--muted); }
 
-    /* Search */
+    /* Search + custom suggestions */
     .search-wrap{ position:relative; display:flex; justify-content:center; }
     #searchBar{
       width:min(760px,92vw); padding:14px 16px; font-size:16px;
       border:1px solid var(--border); border-radius:12px; outline:none;
     }
-    /* Custom suggestion dropdown (replaces datalist) */
     .suggestions{
       position:absolute; top:100%; left:50%; transform:translateX(-50%);
       width:min(760px,92vw); background:#fff; border:1px solid var(--border);
@@ -44,7 +43,9 @@
       min-width:180px; max-width:180px; background:var(--card); border:1px solid var(--border);
       border-radius:16px; overflow:hidden; scroll-snap-align:start; cursor:pointer; display:flex; flex-direction:column;
     }
-    .card img{ width:100%; height:200px; object-fit:cover; background:#d1d5db; }
+    .card img{
+      width:100%; height:200px; object-fit:cover; background:#d1d5db; display:block;
+    }
     .card .meta{ display:flex; justify-content:space-between; align-items:center; padding:10px 12px; }
     .card .name{ font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .card .cta{ font-size:12px; font-weight:700; color:var(--accent); }
@@ -125,7 +126,7 @@
       buildCarousel(players);
     }
 
-    /* ---------- Custom autocomplete ---------- */
+    /* ---------- Custom autocomplete (no native datalist) ---------- */
     function onType(){
       const q = document.getElementById("searchBar").value.trim().toLowerCase();
       const box = document.getElementById("suggestions");
@@ -149,18 +150,20 @@
     function onKeyNav(e){
       const box = document.getElementById("suggestions");
       const items = Array.from(box.children);
-      if(!items.length) return;
-
-      if(e.key === "ArrowDown"){ e.preventDefault(); activeIndex = (activeIndex+1) % items.length; highlight(items); }
-      else if(e.key === "ArrowUp"){ e.preventDefault(); activeIndex = (activeIndex-1+items.length) % items.length; highlight(items); }
-      else if(e.key === "Enter"){
-        if(activeIndex >= 0){ e.preventDefault(); selectSuggestion(activeIndex); }
-        else {
-          // direct exact match
+      if(!items.length){
+        if(e.key === "Enter"){
           const val = document.getElementById("searchBar").value.trim().toLowerCase();
           const m = players.find(p=>p.name.toLowerCase()===val);
           if(m) showPlayer(m);
         }
+        return;
+      }
+
+      if(e.key === "ArrowDown"){ e.preventDefault(); activeIndex = (activeIndex+1) % items.length; highlight(items); }
+      else if(e.key === "ArrowUp"){ e.preventDefault(); activeIndex = (activeIndex-1+items.length) % items.length; highlight(items); }
+      else if(e.key === "Enter"){
+        e.preventDefault();
+        if(activeIndex >= 0){ selectSuggestion(activeIndex); }
       } else if(e.key === "Escape"){ box.style.display="none"; }
     }
 
@@ -215,40 +218,54 @@
     function showPreview(url){ document.getElementById("previewFrame").src = url; }
     function getDomain(url){ try{ return new URL(url).hostname.replace(/^www\./,""); }catch{ return "Link"; } }
 
-    /* ---------- Carousel ---------- */
+    /* ---------- Carousel (includes everyone; uses placeholder when missing) ---------- */
     function buildCarousel(all){
-      const withImg = all.filter(p=>p.img);
-      const pool = withImg.length ? withImg : all.map(p=>({...p, img: PLACEHOLDER_IMG}));
+      const pool = all.map(p => ({
+        ...p,
+        img: (p.img && p.img.trim()) ? p.img.trim() : PLACEHOLDER_IMG
+      }));
 
       const picks = [];
       const used = new Set();
       const max = Math.min(12, pool.length);
-      while(picks.length < max){
-        const i = Math.floor(Math.random()*pool.length);
-        if(!used.has(i)){ used.add(i); picks.push(pool[i]); }
+      while (picks.length < max){
+        const i = Math.floor(Math.random() * pool.length);
+        if (!used.has(i)){ used.add(i); picks.push(pool[i]); }
       }
 
       const block = document.getElementById("carouselBlock");
-      const wrap = document.getElementById("carousel");
+      const wrap  = document.getElementById("carousel");
       wrap.innerHTML = "";
-      picks.forEach(p=>{
+
+      picks.forEach(p => {
         const card = document.createElement("div");
         card.className = "card";
         card.innerHTML = `
-          <img src="${p.img || PLACEHOLDER_IMG}" alt="${p.name || 'Athlete'}"/>
-          <div class="meta"><div class="name" title="${p.name}">${p.name}</div><div class="cta">Open</div></div>`;
-        card.onclick = ()=>{ document.getElementById("searchBar").value = p.name; showPlayer(p); };
+          <img src="${p.img}"
+               alt="${p.name || 'Athlete'}"
+               crossorigin="anonymous"
+               onerror="this.onerror=null; this.src='${PLACEHOLDER_IMG}';" />
+          <div class="meta">
+            <div class="name" title="${p.name}">${p.name}</div>
+            <div class="cta">Open</div>
+          </div>
+        `;
+        card.onclick = () => {
+          document.getElementById("searchBar").value = p.name;
+          showPlayer(p);
+        };
         wrap.appendChild(card);
       });
+
       block.style.display = picks.length ? "block" : "none";
 
       // gentle auto-scroll
-      let x=0;
+      let x = 0;
       setInterval(()=>{
-        if(!wrap.isConnected) return;
-        x = (x+220);
-        if(x > wrap.scrollWidth - wrap.clientWidth) x = 0;
-        wrap.scrollTo({left:x, behavior:"smooth"});
+        if (!wrap.isConnected) return;
+        x = (x + 220);
+        if (x > wrap.scrollWidth - wrap.clientWidth) x = 0;
+        wrap.scrollTo({ left: x, behavior:"smooth" });
       }, 4000);
     }
 
