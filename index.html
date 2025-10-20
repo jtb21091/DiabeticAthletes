@@ -1,233 +1,302 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLB Player Links</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            margin: 0;
-            padding-bottom: 50px;
-        }
-        .container {
-            width: 80%;
-            max-width: 800px;
-            text-align: center;
-        }
-        input {
-            width: 80%;
-            padding: 10px;
-            margin-bottom: 20px;
-            font-size: 16px;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            margin: 10px 0;
-            font-size: 18px;
-            cursor: pointer;
-            color: blue;
-            font-weight: bold;
-            text-decoration: underline;
-        }
-        li:hover {
-            color: darkred;
-        }
-        .links-container {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20px;
-            width: 100%;
-        }
-        .links-container a {
-            text-decoration: none;
-            color: blue;
-            font-weight: bold;
-            margin: 5px;
-            display: block;
-        }
-        .links-container a:hover {
-            color: darkred;
-        }
-        /* ✅ Widen and Increase Height of the Iframe */
-        .iframe-container {
-            display: none;
-            width: 90%;
-            max-width: 1200px;
-            height: 600px;
-            border: 2px solid #ccc;
-            margin-top: 20px;
-            overflow: auto;
-        }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            overflow: auto;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diabetic Athletes — T1D Awareness</title>
+  <style>
+    :root {
+      --bg:#ffffff;
+      --text:#111827;
+      --accent:#0ea5e9;
+      --card:#f3f4f6;
+      --border:#e5e7eb;
+    }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      display:flex;
+      justify-content:center;
+      min-height:100vh;
+    }
+    .container {
+      width: min(1100px, 94vw);
+      padding: 32px 0 72px;
+      text-align:center;
+    }
+    h1 { margin: 0 0 16px; font-weight: 800; }
+    .sub { margin: 0 0 24px; color:#6b7280; }
+
+    /* Search */
+    .search-wrap { display:flex; justify-content:center; }
+    input[type="text"]{
+      width:min(760px, 92vw);
+      padding:14px 16px;
+      font-size:16px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      outline:none;
+    }
+
+    /* Hide the big list of names */
+    #playerList { display:none; }
+
+    /* Links + iframe */
+    .links-container{
+      display:none;
+      flex-direction:column;
+      align-items:center;
+      margin-top:24px;
+      width:100%;
+    }
+    .links-container a{
+      text-decoration:none;
+      color:#2563eb;
+      font-weight:600;
+      margin:6px 0;
+      display:block;
+    }
+    .links-container a:hover{ color:#b91c1c; }
+    .iframe-container{
+      display:none;
+      width:100%;
+      height:640px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      margin-top:16px;
+      overflow:hidden;
+    }
+    iframe{ width:100%; height:100%; border:0; }
+
+    /* Carousel */
+    .carousel-title { text-align:left; margin:28px 0 10px; font-size:18px; font-weight:700; }
+    .carousel {
+      display:flex;
+      gap:14px;
+      overflow-x:auto;
+      scroll-snap-type:x mandatory;
+      padding: 8px 4px 8px 2px;
+    }
+    .card {
+      min-width: 180px; max-width: 180px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius:16px;
+      overflow:hidden;
+      scroll-snap-align:start;
+      cursor:pointer;
+      display:flex;
+      flex-direction:column;
+      text-align:left;
+    }
+    .card img {
+      width:100%; height:200px; object-fit:cover; background:#d1d5db;
+    }
+    .card .meta {
+      padding:10px 12px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .card .name { font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .card .cta {
+      font-size:12px; font-weight:700; color:var(--accent);
+    }
+
+    /* small helper */
+    .muted { color:#6b7280; font-size:12px; }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Diabetic Athletes</h1>
+    <p class="sub">Search by name to open links and a live preview. Click a card below to jump right in.</p>
 
-    <div class="container">
-        <h1>MLB Player Profile Links</h1>
-        
-        <input type="text" id="searchBar" placeholder="Search for a player..." list="playerNames" oninput="filterPlayers()" onkeypress="handleEnterKey(event)">
-        <datalist id="playerNames"></datalist>
-        
-        <ul id="playerList"></ul>
-
-        <div id="linksContainer" class="links-container">
-            <h2 id="playerTitle"></h2>
-            <div id="linksList"></div>
-        </div>
-
-        <div id="iframeContainer" class="iframe-container">
-            <iframe id="previewFrame"></iframe>
-        </div>
+    <div class="search-wrap">
+      <input type="text" id="searchBar" placeholder="Search for a player…" list="playerNames" oninput="updateAutoComplete()" onkeypress="handleEnterKey(event)" />
+      <datalist id="playerNames"></datalist>
     </div>
 
-    <script>
-        const csvFilePath = "T1Ds - Sheet1.csv";
+    <!-- Random Carousel -->
+    <div id="carouselBlock" style="display:none;">
+      <div class="carousel-title">Explore athletes</div>
+      <div id="carousel" class="carousel" aria-label="Random athlete carousel"></div>
+      <div class="muted" id="carouselHint">Tip: click a card to load links & preview.</div>
+    </div>
 
-        let players = [];
+    <!-- Hidden big list (kept for compatibility, not shown) -->
+    <ul id="playerList"></ul>
 
-        async function fetchCSV() {
-            try {
-                const response = await fetch(csvFilePath);
-                const text = await response.text();
-                parseCSV(text);
-            } catch (error) {
-                console.error("Error loading CSV file:", error);
-            }
-        }
+    <!-- Links + Preview -->
+    <div id="linksContainer" class="links-container">
+      <h2 id="playerTitle"></h2>
+      <div id="linksList"></div>
+    </div>
+    <div id="iframeContainer" class="iframe-container">
+      <iframe id="previewFrame" title="Preview"></iframe>
+    </div>
+  </div>
 
-        function parseCSV(csvText) {
-            const rows = csvText.split("\n").map(row => row.split(","));
-            players = rows.slice(1).map(row => {
-                const name = row[0].trim();
-                const links = row.slice(1).map(link => link.trim()).filter(link => link);
-                return { name, links };
-            });
+  <script>
+    const csvFilePath = "T1Ds - Sheet1.csv";
+    const PLACEHOLDER_IMG = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1200&auto=format&fit=crop"; // neutral fallback
 
-            players.sort((a, b) => a.name.localeCompare(b.name));
+    let players = [];
 
-            displayPlayers(players);
-        }
+    async function fetchCSV() {
+      try {
+        const resp = await fetch(csvFilePath);
+        const text = await resp.text();
+        parseCSV(text);
+      } catch (e) {
+        console.error("Error loading CSV:", e);
+      }
+    }
 
-        function displayPlayers(playerArray) {
-            const list = document.getElementById("playerList");
-            list.innerHTML = "";
-            playerArray.forEach(player => {
-                const li = document.createElement("li");
-                li.textContent = player.name;
-                li.onclick = () => showPlayerLinks(player);
-                list.appendChild(li);
-            });
+    function parseCSV(csvText){
+      const rows = csvText
+        .split(/\r?\n/)
+        .filter(r => r.trim().length)
+        .map(row => row.split(","));
 
-            updateAutoComplete();
-        }
+      // Expect: Name, ImageURL, Link1, Link2, ...
+      players = rows.slice(1).map(cols => {
+        const name = (cols[0]||"").trim();
+        const img  = (cols[1]||"").trim();
+        const links = cols.slice(2).map(x => (x||"").trim()).filter(Boolean);
+        return { name, img, links };
+      }).filter(p => p.name);
 
-        function filterPlayers() {
-            const searchTerm = document.getElementById("searchBar").value.toLowerCase();
-            const filteredPlayers = players.filter(player => player.name.toLowerCase().includes(searchTerm));
-            displayPlayers(filteredPlayers);
-        }
+      players.sort((a,b)=>a.name.localeCompare(b.name));
 
-        function updateAutoComplete() {
-            const searchTerm = document.getElementById("searchBar").value.toLowerCase();
-            const dataList = document.getElementById("playerNames");
-            dataList.innerHTML = "";
+      // We NO LONGER render the full list of names
+      updateAutoComplete();
+      buildCarousel(players);
+    }
 
-            players
-                .filter(player => player.name.toLowerCase().includes(searchTerm))
-                .forEach(player => {
-                    const option = document.createElement("option");
-                    option.value = player.name;
-                    dataList.appendChild(option);
-                });
-        }
+    function updateAutoComplete(){
+      const val = document.getElementById("searchBar").value.toLowerCase();
+      const dl = document.getElementById("playerNames");
+      dl.innerHTML = "";
+      players
+        .filter(p => p.name.toLowerCase().includes(val))
+        .slice(0, 50) // keep it snappy
+        .forEach(p => {
+          const opt = document.createElement("option");
+          opt.value = p.name;
+          dl.appendChild(opt);
+        });
+    }
 
-        function handleEnterKey(event) {
-            if (event.key === "Enter") {
-                const searchInput = document.getElementById("searchBar").value.toLowerCase();
-                const matchedPlayer = players.find(player => player.name.toLowerCase() === searchInput);
-                if (matchedPlayer) {
-                    showPlayerLinks(matchedPlayer);
-                }
-            }
-        }
+    function handleEnterKey(ev){
+      if (ev.key === "Enter"){
+        const val = document.getElementById("searchBar").value.toLowerCase();
+        const match = players.find(p => p.name.toLowerCase() === val);
+        if (match){ showPlayer(match); }
+      }
+    }
 
-        function showPlayerLinks(player) {
-            const linksContainer = document.getElementById("linksContainer");
-            const linksList = document.getElementById("linksList");
-            const iframeContainer = document.getElementById("iframeContainer");
-            const playerTitle = document.getElementById("playerTitle");
-            const iframe = document.getElementById("previewFrame");
+    // If user selects from the datalist and the text field "changes"
+    document.getElementById("searchBar").addEventListener("change", () => {
+      const val = document.getElementById("searchBar").value.toLowerCase();
+      const match = players.find(p => p.name.toLowerCase() === val);
+      if (match){ showPlayer(match); }
+    });
 
-            playerTitle.textContent = `Links for ${player.name}`;
+    function showPlayer(player){
+      const linksContainer = document.getElementById("linksContainer");
+      const linksList = document.getElementById("linksList");
+      const iframeContainer = document.getElementById("iframeContainer");
+      const playerTitle = document.getElementById("playerTitle");
 
-            linksList.innerHTML = "";
+      playerTitle.textContent = player.name;
+      linksList.innerHTML = "";
 
-            if (player.links.length === 0) {
-                linksList.innerHTML = "<p>No links available for this player.</p>";
-                iframeContainer.style.display = "none";
-            } else {
-                player.links.forEach((link, index) => {
-                    const a = document.createElement("a");
-                    a.href = link;
-                    a.textContent = getDomainName(link);
-                    a.target = "_blank";
-                    a.rel = "noopener noreferrer";
+      if (!player.links.length){
+        linksList.innerHTML = "<p>No links available for this player.</p>";
+        iframeContainer.style.display = "none";
+      } else {
+        player.links.forEach((link, i) => {
+          const a = document.createElement("a");
+          a.href = link;
+          a.textContent = getDomain(link);
+          a.target = "_blank"; a.rel = "noopener noreferrer";
 
-                    a.onclick = (event) => {
-                        event.preventDefault();
-                        showPreview(link);
-                        window.open(link, "_blank");
-                    };
+          a.onclick = (e) => {
+            e.preventDefault();
+            showPreview(link);
+            window.open(link, "_blank");
+          };
 
-                    linksList.appendChild(a);
+          linksList.appendChild(a);
+          if (i === 0) showPreview(link);
+        });
+        iframeContainer.style.display = "block";
+      }
 
-                    if (index === 0) {
-                        showPreview(link);
-                    }
-                });
+      linksContainer.style.display = "flex";
+      setTimeout(()=>linksContainer.scrollIntoView({behavior:"smooth"}), 100);
+    }
 
-                iframeContainer.style.display = "block";
-            }
+    function showPreview(url){
+      const iframe = document.getElementById("previewFrame");
+      iframe.src = url;
+    }
 
-            linksContainer.style.display = "flex";
+    function getDomain(url){
+      try { return new URL(url).hostname.replace(/^www\./, ""); }
+      catch { return "Link"; }
+    }
 
-            setTimeout(() => {
-                linksContainer.scrollIntoView({ behavior: "smooth" });
-            }, 200);
-        }
+    /* -------- Carousel -------- */
+    function buildCarousel(all){
+      const withImages = all.filter(p => p.img);
+      const pool = withImages.length ? withImages : all.map(p => ({...p, img: PLACEHOLDER_IMG}));
 
-        function showPreview(url) {
-            const iframe = document.getElementById("previewFrame");
-            iframe.src = url;
-        }
+      // pick up to 12 random unique players
+      const picks = [];
+      const used = new Set();
+      const max = Math.min(12, pool.length);
+      while (picks.length < max){
+        const i = Math.floor(Math.random() * pool.length);
+        if (!used.has(i)){ used.add(i); picks.push(pool[i]); }
+      }
 
-        function getDomainName(url) {
-            try {
-                const domain = new URL(url).hostname.replace("www.", "");
-                return domain;
-            } catch {
-                return "Link";
-            }
-        }
+      const block = document.getElementById("carouselBlock");
+      const wrap  = document.getElementById("carousel");
+      wrap.innerHTML = "";
 
-        fetchCSV();
-    </script>
+      picks.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <img src="${p.img || PLACEHOLDER_IMG}" alt="${p.name || 'Athlete'}"/>
+          <div class="meta">
+            <div class="name" title="${p.name}">${p.name}</div>
+            <div class="cta">Open</div>
+          </div>
+        `;
+        card.onclick = () => {
+          document.getElementById("searchBar").value = p.name;
+          updateAutoComplete();
+          showPlayer(p);
+        };
+        wrap.appendChild(card);
+      });
 
+      block.style.display = picks.length ? "block" : "none";
+
+      // gentle auto-scroll hint
+      let x = 0;
+      setInterval(()=>{
+        if (!wrap.isConnected) return;
+        x = (x + 220);
+        if (x > wrap.scrollWidth - wrap.clientWidth) x = 0;
+        wrap.scrollTo({ left: x, behavior: "smooth" });
+      }, 4000);
+    }
+
+    fetchCSV();
+  </script>
 </body>
 </html>
