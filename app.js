@@ -72,7 +72,9 @@ if (typeof document !== 'undefined') {
     $('correctProfile').href = `https://github.com/jtb21091/DiabeticAthletes/issues/new?title=${encodeURIComponent(`Profile correction: ${person.name}`)}&body=${encodeURIComponent('Suggested correction:\n\nSupporting public source:\n')}`;
     $('copyProfile').textContent = 'Copy profile link';
     history.replaceState(null,'',`#person=${slug(person.name)}`);
-    if(!dialog.open) dialog.showModal();
+    if(!dialog.open) dialog.show();
+    dialog.classList.remove('minimized');$('minimizeProfile').setAttribute('aria-expanded','true');$('minimizeProfile').textContent='−';
+    $('panelTitle').textContent=person.name;
     dialog.classList.remove('reading');
     if(previewURL || person.links.length) showReader(previewURL || person.links[0], false);
   }
@@ -103,7 +105,14 @@ if (typeof document !== 'undefined') {
   }
   $('search').addEventListener('input',render); $('sort').addEventListener('change',render); $('clear').addEventListener('click',reset); $('reset').addEventListener('click',reset); $('retry').addEventListener('click',load);
   $('closeProfile').addEventListener('click',()=>dialog.close());
-  dialog.addEventListener('click',event=>{ if(event.target === dialog) { const r=dialog.getBoundingClientRect(); if(event.clientX<r.left || event.clientX>r.right || event.clientY<r.top || event.clientY>r.bottom) dialog.close(); } });
+  $('minimizeProfile').addEventListener('click',()=>{const minimized=dialog.classList.toggle('minimized');$('minimizeProfile').setAttribute('aria-expanded',String(!minimized));$('minimizeProfile').setAttribute('aria-label',minimized?'Restore profile':'Minimize profile');$('minimizeProfile').textContent=minimized?'＋':'−';});
+  $('expandProfile').addEventListener('click',()=>{dialog.style.left='';dialog.style.top='';dialog.style.right='';dialog.style.bottom='';dialog.classList.remove('minimized');$('minimizeProfile').setAttribute('aria-expanded','true');$('minimizeProfile').textContent='−';const expanded=dialog.classList.toggle('expanded');$('expandProfile').setAttribute('aria-pressed',String(expanded));});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape' && dialog.open)dialog.close();});
+  const handle=dialog.querySelector('.dialog-top');let dragging=null;
+  handle.addEventListener('pointerdown',event=>{if(event.target.closest('button') || event.button!==0 || innerWidth<701)return;const r=dialog.getBoundingClientRect();dragging={x:event.clientX,y:event.clientY,left:r.left,top:r.top};handle.setPointerCapture(event.pointerId);});
+  handle.addEventListener('pointermove',event=>{if(!dragging)return;const r=dialog.getBoundingClientRect();dialog.style.left=Math.max(0,Math.min(innerWidth-r.width,dragging.left+event.clientX-dragging.x))+'px';dialog.style.top=Math.max(0,Math.min(innerHeight-50,dragging.top+event.clientY-dragging.y))+'px';dialog.style.right='auto';dialog.style.bottom='auto';});
+  const stopDrag=()=>{dragging=null;};handle.addEventListener('pointerup',stopDrag);handle.addEventListener('lostpointercapture',stopDrag);
+  window.addEventListener('resize',()=>{dialog.style.left='';dialog.style.top='';dialog.style.right='';dialog.style.bottom='';});
   dialog.addEventListener('close',()=>{if($('readerFrame'))$('readerFrame').src='about:blank';dialog.classList.remove('reading');if(location.hash.startsWith('#person=')) history.replaceState(null,'','#directory'); if(lastTrigger?.isConnected) lastTrigger.focus();});
   $('copyProfile').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href);$('copyProfile').textContent='Link copied';}catch{$('copyProfile').textContent='Copy the address above';}});
   window.addEventListener('hashchange',()=>{if(location.hash.startsWith('#person=')) fromHash(); else if(dialog.open) dialog.close();});
