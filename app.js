@@ -28,15 +28,20 @@ if (typeof document !== 'undefined') {
     if(person.image) { const img = el('img'); img.alt = ''; img.src = person.image; img.loading = 'lazy'; img.addEventListener('error',()=>img.remove(),{once:true}); node.append(img); }
     return node;
   }
+  async function enrichPhotos() {
+    const candidates = people.filter(p=>!p.image).map(person=>({person,url:person.links.find(link=>new URL(link).hostname==='en.wikipedia.org')})).filter(x=>x.url);
+    let next = 0;
+    async function worker() { while(next<candidates.length) { const {person,url}=candidates[next++]; try { const title=decodeURIComponent(new URL(url).pathname.split('/wiki/')[1]); const response=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`); if(!response.ok)continue;const data=await response.json(); const image=safeURL(data.thumbnail?.source);if(image){person.image=image; for(const card of $('grid').children){if(card.querySelector('h3')?.textContent===person.name)card.querySelector('.portrait').replaceWith(portrait(person));}} } catch { /* Photos are optional; keep the initials. */ } } }
+    await Promise.all([worker(),worker(),worker()]);
+  }
   function render() {
     const query = normalize($('search').value.trim());
     const visible = people.filter(p => (field === 'All' || p.field === field) && normalize(`${p.name} ${p.field}`).includes(query)).sort((a,b)=>a.name.localeCompare(b.name) * ($('sort').value === 'desc' ? -1 : 1));
     $('grid').replaceChildren();
     for(const person of visible) {
-      const button = el('button','card'); button.type = 'button'; button.setAttribute('aria-label',`Explore ${person.name}, ${person.field}`);
+      const button = el('article','card');
       button.append(portrait(person)); const body = el('div','card-body'); body.append(el('span','tag',person.field),el('h3','',person.name));
-      const bottom = el('div','card-bottom'); bottom.append(el('span','',person.links.length ? `${person.links.length} public ${person.links.length === 1 ? 'link' : 'links'}` : 'Help add sources'),el('b','','↗')); body.append(bottom); button.append(body);
-      button.addEventListener('click',()=>openProfile(person,button)); $('grid').append(button);
+      const bottom = el('div','card-bottom'); const open = el('button','profile-button','View profile'); open.type='button'; open.setAttribute('aria-label',`View ${person.name} profile`); open.addEventListener('click',()=>openProfile(person,open)); bottom.append(open); body.append(bottom); const quick = el('div','quick-links'); for(const url of person.links.slice(0,2)){const a=el('a','',new URL(url).hostname.replace(/^www\./,'')+' ↗');a.href=url;a.target='_blank';a.rel='noopener noreferrer';quick.append(a);} if(!person.links.length)quick.append(el('span','','No links yet')); body.append(quick);button.append(body); $('grid').append(button);
     }
     $('resultCount').textContent = `Showing ${visible.length} of ${people.length} people`;
     $('empty').hidden = visible.length > 0; $('clear').hidden = !query && field === 'All';
@@ -75,7 +80,7 @@ if (typeof document !== 'undefined') {
       if(!people.length) throw new Error('Empty directory');
       const fields=[...new Set(people.map(p=>p.field))].sort(); $('peopleCount').textContent=people.length; $('fieldCount').textContent=fields.length; $('filters').replaceChildren();
       for(const name of ['All',...fields]) { const button=el('button','',name); button.type='button'; button.addEventListener('click',()=>{field=name;render();}); $('filters').append(button); }
-      render(); fromHash();
+      render(); fromHash(); enrichPhotos();
     } catch(error) { if(version !== loadVersion) return; console.error(error); $('grid').replaceChildren(); $('error').hidden=false; $('empty').hidden=true; $('resultCount').textContent='Directory unavailable'; }
   }
   $('search').addEventListener('input',render); $('sort').addEventListener('change',render); $('clear').addEventListener('click',reset); $('reset').addEventListener('click',reset); $('retry').addEventListener('click',load);
