@@ -1,30 +1,47 @@
-# DiabeticAthletes
-A simple website, data, links and information for T1D athletes, musicians, actors and actresses so that people can find them in one source. 
+# Diabetic Athletes
 
-This is a work in progress.
+An independent, community-built directory of athletes, musicians and actors living with type 1 diabetes, created by Joshua Brooks.
 
-Let me know if I am missing any T1D (only type 1, not type 2)
+**Live site:** https://jtb21091.github.io/DiabeticAthletes/
 
-Anyone who wants to help is more than free to; just email me how you would like to help
+## Features
 
-## Link and example
+- Search all people by name or field, filter by field and sort alphabetically.
+- Keyboard-accessible profile dialogs with public links and shareable profile URLs.
+- Responsive layouts and reliable initials when a photo is unavailable.
+- Community resource links and a structured profile suggestion form.
+- Quoted CSV parsing, safe public URL handling, and visible loading/error/empty states.
 
-https://jtb21091.github.io/DiabeticAthletes/
+## Run locally
 
-![alt text](image.png)
+No build or installation is required. Serve the repository using a local HTTP server:
 
-## Please check these out for awareness and more information
+```sh
+python3 -m http.server 8000
+```
 
-https://www.breakthrought1d.org/
+Open http://localhost:8000. Opening index.html directly with a file URL will not support data fetching.
 
-https://gis.cdc.gov/grasp/diabetes/diabetesatlas.html
+## Data and contributions
 
-https://beyondtype1.org/
+`T1Ds - Sheet1.csv` remains the directory’s source of names, images and links. It uses the columns `Name,ImageURL,Link1,...,Link24`. Quote fields containing commas; standard CSV tools do this automatically.
 
-https://github.com/jtb21091/HealthDataPublicDiabetes
+`profiles.json` holds fields, optional summaries, T1D sources and review dates keyed by the exact CSV name. Existing entries are community supplied and have not all been independently reverified. The three October 2026 additions include public sources documenting T1D. Team URLs in historical entries may refer to earlier seasons; they are not claims about current affiliations.
 
-https://en.wikipedia.org/wiki/Category:People_with_type_1_diabetes
+Use [Suggest a person](https://github.com/jtb21091/DiabeticAthletes/issues/new?template=suggest-person.yml) to propose additions. Provide a public source explicitly confirming **type 1** diabetes; general references to diabetes are insufficient. Do not submit private health information. Link to public profiles and use only images you have permission to use. Corrections can be suggested from each profile.
 
-# 🏆 Diabetic Athletes - Player Links
+## Validation
 
-This project provides an easy-to-use **Player Profile Link Finder** that allows users to search for diabetic athletes and access their player profile links. The search bar helps you find players quickly, and each player has multiple links categorized by website. This now includes musicians, actors and actresses.
+```sh
+node --test tests/data.test.cjs
+```
+
+Checks quoted CSV fields, the Nacho Fernández comma-containing URL, data coverage, new-source metadata, search normalization and unsafe URL rejection.
+
+## Deployment
+
+The site is plain HTML, CSS, JavaScript, CSV and JSON and works with GitHub Pages at the repository subpath. Publish the root of `main` using the repository’s existing Pages configuration. Changes on a proposed branch do not update the live site until merged into the publishing branch.
+
+Google Fonts is optional; system fonts provide a fallback. Profile images are external and fall back to initials if unavailable. Public links open directly in a new tab rather than relying on third-party iframe support.
+
+This project provides awareness and discovery, not individual medical advice. Inclusion does not imply endorsement.
