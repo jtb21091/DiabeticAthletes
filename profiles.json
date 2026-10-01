@@ -1,0 +1,95 @@
+{
+  "Adam Duvall": {
+    "field": "Baseball"
+  },
+  "Garrett Mitchell": {
+    "field": "Baseball"
+  },
+  "Mason Miller": {
+    "field": "Baseball"
+  },
+  "Jason Johnson": {
+    "field": "Baseball"
+  },
+  "Brandon Morrow": {
+    "field": "Baseball"
+  },
+  "Jay Cutler": {
+    "field": "Football"
+  },
+  "Mark Andrews": {
+    "field": "Football"
+  },
+  "Noah Gray": {
+    "field": "Football"
+  },
+  "Adonai Mitchell": {
+    "field": "Football"
+  },
+  "Blake Ferguson": {
+    "field": "Football"
+  },
+  "Chad Muma": {
+    "field": "Football"
+  },
+  "Chris Dudley": {
+    "field": "Basketball"
+  },
+  "Adam Morrison": {
+    "field": "Basketball"
+  },
+  "Gary Forbes": {
+    "field": "Basketball"
+  },
+  "Austin Freeman": {
+    "field": "Basketball"
+  },
+  "Lauren Cox": {
+    "field": "Basketball",
+    "summary": "Basketball player and T1D advocate. Discover her story of competing with type 1 diabetes.",
+    "source": "https://www.breakthrought1d.org/news-and-updates/jdrf-spokesperson-lauren-cox-3-in-wnba-draft/",
+    "reviewed": "2026-10-01"
+  },
+  "Luke Kunin": {
+    "field": "Hockey"
+  },
+  "Max Domi": {
+    "field": "Hockey"
+  },
+  "Kaapo Kakko": {
+    "field": "Hockey"
+  },
+  "Riley Tufte": {
+    "field": "Hockey"
+  },
+  "Jordan Morris": {
+    "field": "Soccer"
+  },
+  "Andy Rose": {
+    "field": "Soccer"
+  },
+  "Nacho Fernandez": {
+    "field": "Soccer"
+  },
+  "Jake O'Brien": {
+    "field": "Soccer"
+  },
+  "Nick Jonas": {
+    "field": "Music"
+  },
+  "Bret Michaels": {
+    "field": "Music"
+  },
+  "Victor Garber": {
+    "field": "Acting",
+    "summary": "Actor and diabetes advocate sharing his experience of living with type 1 diabetes.",
+    "source": "https://beyondtype1.org/beyond-type-1s-council-member-victor-garber-talks-diabetes-daily/",
+    "reviewed": "2026-10-01"
+  },
+  "Brec Bassinger": {
+    "field": "Acting",
+    "summary": "Actor sharing her first-person experience of managing type 1 diabetes while working on set.",
+    "source": "https://www.futureofpersonalhealth.com/diabetes/type-1-diabetes-empowers-me-to-do-something-bigger-than-myself/",
+    "reviewed": "2026-10-01"
+  }
+}

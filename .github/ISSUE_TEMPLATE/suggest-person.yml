@@ -1,0 +1,27 @@
+name: Suggest a person
+description: Add a publicly documented type 1 diabetes role model.
+title: "Profile suggestion: "
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Person’s name
+    validations:
+      required: true
+  - type: input
+    id: field
+    attributes:
+      label: Sport or field
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Public source confirming type 1 diabetes
+      description: Prefer the person’s own account, an official organization, or a reliable interview. A general diabetes reference is insufficient.
+    validations:
+      required: true
+  - type: textarea
+    id: links
+    attributes:
+      label: Profile links and other notes
