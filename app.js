@@ -25,13 +25,13 @@ if (typeof document !== 'undefined') {
   function portrait(person) {
     const node = el('div', `portrait ${person.field.toLowerCase()}`);
     node.append(el('span','initials',person.name.split(/\s+/).map(n=>n[0]).slice(0,2).join('')));
-    if(person.image) { const img = el('img'); img.alt = ''; img.src = person.image; img.loading = 'lazy'; img.addEventListener('error',()=>img.remove(),{once:true}); node.append(img); }
+    if(person.image) { const img = el('img'); img.alt = ''; img.src = person.image; img.loading = 'lazy'; img.addEventListener('error',()=>img.remove(),{once:true}); node.append(img); if(person.photoSource){const source=el('a','photo-credit','Photo: Wikipedia ↗');source.href=person.photoSource;source.target='_blank';source.rel='noopener noreferrer';node.append(source);} }
     return node;
   }
   async function enrichPhotos() {
     const candidates = people.filter(p=>!p.image).map(person=>({person,url:person.links.find(link=>new URL(link).hostname==='en.wikipedia.org')})).filter(x=>x.url);
     let next = 0;
-    async function worker() { while(next<candidates.length) { const {person,url}=candidates[next++]; try { const title=decodeURIComponent(new URL(url).pathname.split('/wiki/')[1]); const response=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`); if(!response.ok)continue;const data=await response.json(); const image=safeURL(data.thumbnail?.source);if(image){person.image=image; for(const card of $('grid').children){if(card.querySelector('h3')?.textContent===person.name)card.querySelector('.portrait').replaceWith(portrait(person));}} } catch { /* Photos are optional; keep the initials. */ } } }
+    async function worker() { while(next<candidates.length) { const {person,url}=candidates[next++]; try { const title=decodeURIComponent(new URL(url).pathname.split('/wiki/')[1]); const response=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`); if(!response.ok)continue;const data=await response.json(); const image=safeURL(data.thumbnail?.source);if(image){person.image=image;person.photoSource=url; for(const card of $('grid').children){if(card.querySelector('h3')?.textContent===person.name)card.querySelector('.portrait').replaceWith(portrait(person));}} } catch { /* Photos are optional; keep the initials. */ } } }
     await Promise.all([worker(),worker(),worker()]);
   }
   function render() {
@@ -47,7 +47,7 @@ if (typeof document !== 'undefined') {
     $('empty').hidden = visible.length > 0; $('clear').hidden = !query && field === 'All';
     for(const button of $('filters').children) button.setAttribute('aria-pressed', String(button.textContent === field));
   }
-  function openProfile(person, trigger) {
+  function openProfile(person, trigger, previewURL) {
     lastTrigger = trigger || null;
     $('profileContent').replaceChildren();
     const heading = el('div','profile-heading'); heading.append(portrait(person));
@@ -55,13 +55,31 @@ if (typeof document !== 'undefined') {
     $('profileContent').append(el('p','profile-note',person.summary || 'Explore this community-supplied profile through the public links below.'));
     if(person.source) { const note = el('p','profile-note',`T1D source reviewed ${person.reviewed}. `); const source = el('a','','Read source ↗'); source.href = person.source; source.target = '_blank'; source.rel = 'noopener noreferrer'; note.append(source); $('profileContent').append(note); }
     const links = el('div','profile-links');
-    for(const url of person.links) { const domain = new URL(url).hostname.replace(/^www\./,''); const a = el('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.append(el('span','',domain),el('span','','↗')); links.append(a); }
+    for(const url of person.links) {
+      const domain = new URL(url).hostname.replace(/^www\./,'');
+      const row = el('div','source-row'); const read = el('button','read-here',`Read here: ${domain}`); read.type='button'; read.addEventListener('click',()=>showReader(url));
+      const a = el('a','open-source','Open tab ↗'); a.href=url; a.target='_blank'; a.rel='noopener noreferrer'; a.setAttribute('aria-label',`Open ${domain} in a new tab`);
+      row.append(read,a); links.append(row);
+    }
     if(!person.links.length) links.append(el('p','profile-note','No public links have been added yet. Know a reliable source? Suggest a correction below.'));
     $('profileContent').append(links);
+    const reader=el('section','embedded-reader'); reader.id='reader'; reader.hidden=true;
+    const controls=el('div','reader-controls'); const label=el('strong','','Reading');label.id='readerLabel';
+    const external=el('a','','Open this page in a new tab ↗');external.id='readerExternal';external.target='_blank';external.rel='noopener noreferrer';
+    const hide=el('button','','Hide reader');hide.type='button';hide.addEventListener('click',()=>{reader.hidden=true;$('readerFrame').src='about:blank';dialog.classList.remove('reading');});
+    controls.append(label,external,hide);reader.append(controls,el('p','reader-note','If the page is blank or says it refused to connect, this publisher blocks embedding. Use “Open this page in a new tab” above.'));
+    const frame=el('iframe');frame.id='readerFrame';frame.title=`Embedded page for ${person.name}`;frame.referrerPolicy='no-referrer';frame.setAttribute('sandbox','allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox');reader.append(frame);$('profileContent').append(reader);
     $('correctProfile').href = `https://github.com/jtb21091/DiabeticAthletes/issues/new?title=${encodeURIComponent(`Profile correction: ${person.name}`)}&body=${encodeURIComponent('Suggested correction:\n\nSupporting public source:\n')}`;
     $('copyProfile').textContent = 'Copy profile link';
     history.replaceState(null,'',`#person=${slug(person.name)}`);
     if(!dialog.open) dialog.showModal();
+    dialog.classList.remove('reading');
+    if(previewURL || person.links.length) showReader(previewURL || person.links[0], false);
+  }
+  function showReader(url, scroll = true) {
+    const safe=safeURL(url);if(!safe)return;
+    $('reader').hidden=false;dialog.classList.add('reading');$('readerLabel').textContent=new URL(safe).hostname.replace(/^www\./,'');$('readerExternal').href=safe;$('readerFrame').src=safe;
+    if(scroll)$('reader').scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
   }
   function fromHash() { if(location.hash.startsWith('#person=')) { const person = people.find(p=>slug(p.name) === location.hash.slice(8)); if(person) openProfile(person); } }
   function reset() { $('search').value=''; field='All'; render(); }
@@ -86,7 +104,7 @@ if (typeof document !== 'undefined') {
   $('search').addEventListener('input',render); $('sort').addEventListener('change',render); $('clear').addEventListener('click',reset); $('reset').addEventListener('click',reset); $('retry').addEventListener('click',load);
   $('closeProfile').addEventListener('click',()=>dialog.close());
   dialog.addEventListener('click',event=>{ if(event.target === dialog) { const r=dialog.getBoundingClientRect(); if(event.clientX<r.left || event.clientX>r.right || event.clientY<r.top || event.clientY>r.bottom) dialog.close(); } });
-  dialog.addEventListener('close',()=>{if(location.hash.startsWith('#person=')) history.replaceState(null,'','#directory'); if(lastTrigger?.isConnected) lastTrigger.focus();});
+  dialog.addEventListener('close',()=>{if($('readerFrame'))$('readerFrame').src='about:blank';dialog.classList.remove('reading');if(location.hash.startsWith('#person=')) history.replaceState(null,'','#directory'); if(lastTrigger?.isConnected) lastTrigger.focus();});
   $('copyProfile').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href);$('copyProfile').textContent='Link copied';}catch{$('copyProfile').textContent='Copy the address above';}});
   window.addEventListener('hashchange',()=>{if(location.hash.startsWith('#person=')) fromHash(); else if(dialog.open) dialog.close();});
   load();

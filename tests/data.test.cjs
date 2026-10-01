@@ -9,11 +9,11 @@ test('CSV preserves quoted commas, escaped quotes, CRLF and multiline fields',()
 test('directory preserves every entry and valid public links',()=>{
  const rows = parseCSV(fs.readFileSync(`${__dirname}/../T1Ds - Sheet1.csv`,'utf8'));
  const metadata=JSON.parse(fs.readFileSync(`${__dirname}/../profiles.json`,'utf8'));
- assert.equal(rows.length-1,28);
- assert.equal(new Set(rows.slice(1).map(r=>r[0])).size,28);
+ assert.equal(rows.length-1,36);
+ assert.equal(new Set(rows.slice(1).map(r=>r[0])).size,36);
  for(const row of rows.slice(1)){assert.ok(metadata[row[0]]?.field);for(const link of row.slice(2).filter(Boolean))assert.ok(safeURL(link),link);}
  assert.equal(rows.find(r=>r[0]==='Nacho Fernandez')[2],'https://en.wikipedia.org/wiki/Nacho_(footballer,_born_1990)');
- for(const name of ['Lauren Cox','Victor Garber','Brec Bassinger']){assert.ok(safeURL(metadata[name].source));assert.equal(metadata[name].reviewed,'2026-10-01');}
+ for(const name of ['Lauren Cox','Victor Garber','Brec Bassinger','Austin Basis','Charlie Kimball','Ryan Reed','Robin Arzon','Derek Theler','Jennifer Stone','Crystal Bowersox','Rhea Norwood']){assert.ok(safeURL(metadata[name].source));assert.equal(metadata[name].reviewed,'2026-10-01');}
 });
 test('unsafe protocols are rejected and accented searches normalize',()=>{
  for(const value of ['javascript:alert(1)','data:text/html,hello','invalid',''])assert.equal(safeURL(value),null);
